@@ -1,0 +1,5 @@
+https://colab.research.google.com/github/maddran/NHL-pred/blob/main/NHL_games_data.ipynb#scrollTo=LVHIdrUWX4Yh: Google collab showing use of updated NHL API
+
+https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md: NHL API documentation
+
+https://medium.com/@vtashlikovich/nhl-api-what-data-is-exposed-and-how-to-analyse-it-with-python-745fcd6838c2: How to work with the old API
