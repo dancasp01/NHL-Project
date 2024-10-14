@@ -89,6 +89,8 @@ def call_nhl(url, start=None, end=None):
   startSeason = 20232024
   endSeason = 20232024
 
+  print("Pinging API")
+
   if start:
     startSeason = start
 
@@ -128,7 +130,7 @@ def call_nhl(url, start=None, end=None):
     ('factCayenneExp', 'gamesPlayed>=1'),
     # Through trial and error, gameTypeId=2 corresponds to regular season games
     # The f-string inserts endSeason and startSeason into the parameters
-    ('cayenneExp', f'gameTypeId=2 and seasonId<={endSeason} and seasonId>={startSeason}'),
+    # ('cayenneExp', f'gameTypeId=2 and seasonId<={endSeason} and seasonId>={startSeason}'),
   )
   
   # Call API with given headers and parameters
@@ -138,7 +140,10 @@ def call_nhl(url, start=None, end=None):
 
 # -------------- Data Methods ---------------
 
-def get_playerIDs():
+def get_playerIDs(season):
+  
+  if not season:
+    season = 20232024
 
   forwards = []
   defensemen = []
@@ -146,9 +151,12 @@ def get_playerIDs():
 
   for team in team_abreviations:
 
-    response = call_nhl('https://api-web.nhle.com/v1/roster/'+ team + '/20232024')
-
-    data = response.json()
+    try:
+      response = call_nhl('https://api-web.nhle.com/v1/roster/'+ team + '/' + str(season))
+      data = response.json()
+    except Exception as error:
+      print("Team: " + str(team) + " did not exist in that year")
+      continue
 
     forwards_data = list(data['forwards'])
     defensemen_data = list(data['defensemen'])
@@ -166,8 +174,9 @@ def get_playerIDs():
   return [forwards, defensemen, goalies]
 
 
-def get_random_player():
-  playerIDs = get_playerIDs()
+def get_random_player(season=None):
+
+  playerIDs = get_playerIDs(season)
 
   fdg = random.randint(0,2)
 
@@ -230,8 +239,6 @@ def get_details(playerID, data):
 def build_playerID(playerID):
   data = get_specific_stats(playerID)
 
-  details = get_details(playerID, data)
-
   previous_teams = []
 
   for season in data.get('seasonTotals', []):
@@ -243,10 +250,53 @@ def build_playerID(playerID):
     if team not in previous_teams:
       previous_teams.append(team)
 
-
   previous_teams = filter_onlyNHL(previous_teams)
 
+  details = get_details(playerID, data)
+
   return details + previous_teams
+
+
+random_player = get_random_player(20032004)
+# print(get_specific_stats(random_player))
+# 8478859 Niko Mikkola
+print(build_playerID(random_player))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -------------- Seasonal Data Methods ---------------
@@ -276,8 +326,3 @@ def get_gameData(url, startYear, numSeasons):
   return res
 
 # print(get_gameData('https://api.nhle.com/stats/rest/en/team/summary', 2024,1))
-
-random_player = get_random_player()
-# print(get_specific_stats(random_player))
-# 8478859 Niko Mikkola
-print(build_playerID(random_player))
