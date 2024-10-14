@@ -47,59 +47,6 @@ team_abreviations = [
   "VGK"   # Vegas Golden Knights
 ]
 
-metro = team_abreviations[:8]
-atlantic = team_abreviations[8:16]
-central = team_abreviations[16:24]
-pacific = team_abreviations[24:32]
-
-eastern = team_abreviations[:16]
-western = team_abreviations[16:]
-
-this_year = 20232024
-
-team_info = {
-  # Metropolitan Division
-  "CAR": ("Carolina", "Hurricanes"),
-  "CBJ": ("Columbus", "Blue Jackets"),
-  "NJD": ("New Jersey", "Devils"),
-  "NYI": ("New York", "Islanders"),
-  "NYR": ("New York", "Rangers"),
-  "PHI": ("Philadelphia", "Flyers"),
-  "PIT": ("Pittsburgh", "Penguins"),
-  "WSH": ("Washington", "Capitals"),
-    
-  # Atlantic Division
-  "BOS": ("Boston", "Bruins"),
-  "BUF": ("Buffalo", "Sabres"),
-  "DET": ("Detroit", "Red Wings"),
-  "FLA": ("Florida", "Panthers"),
-  "MTL": ("Montreal", "Canadiens"),
-  "OTT": ("Ottawa", "Senators"),
-  "TBL": ("Tampa Bay", "Lightning"),
-  "TOR": ("Toronto", "Maple Leafs"),
-    
-  # Central Division
-  "ARI": ("Arizona", "Coyotes"),
-  "CHI": ("Chicago", "Blackhawks"),
-  "COL": ("Colorado", "Avalanche"),
-  "DAL": ("Dallas", "Stars"),
-  "MIN": ("Minnesota", "Wild"),
-  "NSH": ("Nashville", "Predators"),
-  "STL": ("St. Louis", "Blues"),
-  "WPG": ("Winnipeg", "Jets"),
-    
-  # Pacific Division
-  "ANA": ("Anaheim", "Ducks"),
-  "CGY": ("Calgary", "Flames"),
-  "EDM": ("Edmonton", "Oilers"),
-  "LAK": ("Los Angeles", "Kings"),
-  "SEA": ("Seattle", "Kraken"),
-  "SJS": ("San Jose", "Sharks"),
-  "VAN": ("Vancouver", "Canucks"),
-  "VGK": ("Vegas", "Golden Knights")
-}
-
-
 nhl_teams = [
   "Ducks",
   "Coyotes",
@@ -137,13 +84,19 @@ nhl_teams = [
 
 # -------------- Call to API ---------------
 
-def call_nhl(url, season=None):
+def call_nhl(url, start=None, end=None):
 
   startSeason = 20232024
   endSeason = 20232024
 
-  if season:
-    startSeason = endSeason = season
+  if start:
+    startSeason = start
+
+  if end:
+    endSeason = end
+  
+  if endSeason < startSeason:
+    return "End season cannot be befor start season"
 
   # # Possible to call API for multiple seasons, 
   # # but if no end season is provided, set end season = start season.
@@ -185,7 +138,7 @@ def call_nhl(url, season=None):
 
 # -------------- Data Methods ---------------
 
-def getPlayerIDs():
+def get_playerIDs():
 
   forwards = []
   defensemen = []
@@ -212,8 +165,9 @@ def getPlayerIDs():
 
   return [forwards, defensemen, goalies]
 
-def getRandomPlayer():
-  playerIDs = getPlayerIDs()
+
+def get_random_player():
+  playerIDs = get_playerIDs()
 
   fdg = random.randint(0,2)
 
@@ -237,9 +191,10 @@ def get_specific_stats(playerID):
 
   return data
 
-# print(get_specific_stats(8474564))
 
 def filter_onlyNHL(teams):
+
+  #This gets rid of non-NHL teams and None from list
 
   onlyNHL = []
 
@@ -247,37 +202,37 @@ def filter_onlyNHL(teams):
     if team in nhl_teams:
       onlyNHL.append(team)
 
-  return onlyNHL[::-1] #reverse bc I want their first team to be first
+  return onlyNHL
 
 
-def build_playerID(playerID):
-  data = get_specific_stats(playerID)
+def get_details(playerID, data):
+  player_details = []
 
-  details = []
   firstName = data.get('firstName')
   lastName = data.get('lastName')
-  details.append((firstName.get('default')))
-  details[0] += " " + (lastName.get('default'))
 
-  # draftDetails': {'year': 2017}
+  player_details.append(playerID)
+  player_details.append((firstName.get('default')))
+  player_details[1] += " " + (lastName.get('default'))
+
 
   try:
     #incase the player was never drafted
     draft_details = data.get('draftDetails')
     draft_year = draft_details.get('year')
-    details.append(draft_year)
+    player_details.append("Drafted: " + str(draft_year))
   except AttributeError:
-    details.append('Not drafted')
+    player_details.append('Not drafted')
+
+  return player_details
+
+
+def build_playerID(playerID):
+  data = get_specific_stats(playerID)
+
+  details = get_details(playerID, data)
 
   previous_teams = []
-
-  current_team_data = data.get('teamCommonName')
-  current_team = current_team_data.get('default')
-
-  previous_teams.append(current_team)
-
-  #BUG When players switch teams in the middle of the season, the parsing really hates that
-  # and gets super confused
 
   for season in data.get('seasonTotals', []):
     
@@ -288,16 +243,10 @@ def build_playerID(playerID):
     if team not in previous_teams:
       previous_teams.append(team)
 
-    
+
   previous_teams = filter_onlyNHL(previous_teams)
 
-
   return details + previous_teams
-
-
-random_player = getRandomPlayer()
-# print(get_specific_stats(random_player))
-print(build_playerID(random_player))
 
 
 # -------------- Seasonal Data Methods ---------------
@@ -327,3 +276,8 @@ def get_gameData(url, startYear, numSeasons):
   return res
 
 # print(get_gameData('https://api.nhle.com/stats/rest/en/team/summary', 2024,1))
+
+random_player = get_random_player()
+# print(get_specific_stats(random_player))
+# 8478859 Niko Mikkola
+print(build_playerID(random_player))
