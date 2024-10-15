@@ -44,10 +44,12 @@ team_abreviations = [
   "SEA",  # Seattle Kraken
   "SJS",  # San Jose Sharks
   "VAN",  # Vancouver Canucks
-  "VGK"   # Vegas Golden Knights
+  "VGK",  # Vegas Golden Knights
+  "UTA"   # Utah Hockey Club
 ]
 
 nhl_teams = [
+  "Hockey Club"
   "Ducks",
   "Coyotes",
   "Bruins",
@@ -86,19 +88,17 @@ nhl_teams = [
 
 def call_nhl(url, start=None, end=None):
 
-  startSeason = 20232024
-  endSeason = 20232024
+  # startSeason = 20232024
+  # endSeason = 20232024
 
-  print("Pinging API")
+  # if start:
+  #   startSeason = start
 
-  if start:
-    startSeason = start
-
-  if end:
-    endSeason = end
+  # if end:
+  #   endSeason = end
   
-  if endSeason < startSeason:
-    return "End season cannot be befor start season"
+  # if endSeason < startSeason:
+  #   return "End season cannot be befor start season"
 
   # # Possible to call API for multiple seasons, 
   # # but if no end season is provided, set end season = start season.
@@ -140,7 +140,7 @@ def call_nhl(url, start=None, end=None):
 
 # -------------- Data Methods ---------------
 
-def get_playerIDs(season):
+def get_all_playerIDs(season):
   
   if not season:
     season = 20232024
@@ -154,8 +154,8 @@ def get_playerIDs(season):
     try:
       response = call_nhl('https://api-web.nhle.com/v1/roster/'+ team + '/' + str(season))
       data = response.json()
-    except Exception as error:
-      print("Team: " + str(team) + " did not exist in that year")
+    except Exception:
+      print("Team: " + str(team) + " did not exist during that season")
       continue
 
     forwards_data = list(data['forwards'])
@@ -171,25 +171,11 @@ def get_playerIDs(season):
     for goalie in golies_data:
       goalies.append(goalie['id'])
 
-  return [forwards, defensemen, goalies]
+  return forwards + defensemen + goalies
 
 
-def get_random_player(season=None):
-
-  playerIDs = get_playerIDs(season)
-
-  fdg = random.randint(0,2)
-
-  if not fdg:
-    print('Forward')
-  elif fdg == 1:
-    print('Defenseman')
-  else:
-    print('Goalie')
-
-  random_player = playerIDs[fdg]
-
-  return random.choice(random_player)
+def get_random_player(all_playerIDs):
+  return random.choice(all_playerIDs)
 
 
 def get_specific_stats(playerID):
@@ -224,6 +210,8 @@ def get_details(playerID, data):
   player_details.append((firstName.get('default')))
   player_details[1] += " " + (lastName.get('default'))
 
+  position = data.get('position')
+  player_details.append(position)
 
   try:
     #incase the player was never drafted
@@ -236,7 +224,7 @@ def get_details(playerID, data):
   return player_details
 
 
-def build_playerID(playerID):
+def get_previous_teams(playerID):
   data = get_specific_stats(playerID)
 
   previous_teams = []
@@ -252,51 +240,58 @@ def build_playerID(playerID):
 
   previous_teams = filter_onlyNHL(previous_teams)
 
-  details = get_details(playerID, data)
+  return  previous_teams
+
+
+def build_playerID(season, min_teams, playerID=None):
+
+  all_ids = get_all_playerIDs(season)
+
+  if not playerID:
+    random_player = get_random_player(all_ids)
+  else:
+    random_player = playerID
+
+  previous_teams = get_previous_teams(random_player)
+
+  while len(previous_teams) < min_teams:
+    # if the current player selected does not have the min
+    # number of teams we want
+
+    # if we found a player that does not meet the required
+    # number of teams, remove him from the list (n-1)
+    all_ids.remove(random_player)
+
+    random_player = get_random_player(all_ids)
+    previous_teams = get_previous_teams(random_player)
+  
+  # If we found a player with the min numbe of teams we want
+  data = get_specific_stats(random_player)
+  details = get_details(random_player, data)
 
   return details + previous_teams
 
 
-random_player = get_random_player(20032004)
 # print(get_specific_stats(random_player))
 # 8478859 Niko Mikkola
-print(build_playerID(random_player))
+# print(get_specific_stats(8478859))
+# print(get_previous_teams(8478859))
 
+# Lazy work around to finding a player that has a minimum number of teams
+# I have the get player IDs which returns all the player IDs for that season
+# However in my get random player, I am calling the get playerIDs method
+# This lazy work around makes it so I call the api 32 times (or for however many teams and players there are in that season)
+# every time I do not find a player with the minimum number of teams
 
+# While player num of teams < min num of teams:
+#   get a random player
+#   print out build player id of that random player
 
+# Black Coleman 8476399 'Devils', 'Lightning', 'Flames'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+season = 20242025
+min_teams = 5
+print(build_playerID(season, min_teams))
 
 
 # -------------- Seasonal Data Methods ---------------
