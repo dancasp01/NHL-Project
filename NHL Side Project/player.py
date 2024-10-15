@@ -201,6 +201,7 @@ def filter_onlyNHL(teams):
 
 
 def get_details(playerID, data):
+  
   player_details = []
 
   firstName = data.get('firstName')
@@ -225,6 +226,7 @@ def get_details(playerID, data):
 
 
 def get_previous_teams(playerID):
+
   data = get_specific_stats(playerID)
 
   previous_teams = []
@@ -250,6 +252,7 @@ def build_playerID(season, min_teams, playerID=None):
   if not playerID:
     random_player = get_random_player(all_ids)
   else:
+    # For testing purposes
     random_player = playerID
 
   previous_teams = get_previous_teams(random_player)
@@ -265,7 +268,7 @@ def build_playerID(season, min_teams, playerID=None):
     random_player = get_random_player(all_ids)
     previous_teams = get_previous_teams(random_player)
   
-  # If we found a player with the min numbe of teams we want
+  # If we found a player with the min number of teams we want
   data = get_specific_stats(random_player)
   details = get_details(random_player, data)
 
