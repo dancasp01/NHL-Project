@@ -1,4 +1,4 @@
-This was a fun challenge as the NHL got rid of their official API for some reason.
+This was a fun challenge as the NHL got rid of their standard API and implemented a new, hard to use one for some reason.
 
 https://www.instagram.com/p/C_yy2HAMtG2/?utm_source=ig_web_copy_link: Link to initial idea for the project.
 
