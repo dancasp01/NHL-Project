@@ -49,7 +49,7 @@ team_abreviations = [
 ]
 
 nhl_teams = [
-  "Hockey Club"
+  "Hockey Club",
   "Ducks",
   "Coyotes",
   "Bruins",
@@ -192,27 +192,26 @@ def filter_onlyNHL(teams):
   #This gets rid of non-NHL teams and None from list
 
   onlyNHL = []
-  rem_dups = []
 
   for team in teams:
     if team in nhl_teams:
       onlyNHL.append(team)
 
-  # two pointer approach
+  rem_dups = []
+  pointer = 0
 
-  left = 0
+  for i in range(len(onlyNHL)):
 
-  for right in range(1,len(onlyNHL)):
-    if onlyNHL[left] != onlyNHL[right]:
-      rem_dups.append(onlyNHL[left])
-      left = right
+    if pointer == i:
+      rem_dups.append(onlyNHL[pointer])
 
-  if onlyNHL[left] != rem_dups[-1]:
-    rem_dups.append(onlyNHL[left])
+    if onlyNHL[pointer] != onlyNHL[i]:
+      pointer = i
+      rem_dups.append(onlyNHL[pointer])
 
   return rem_dups
 
-print(filter_onlyNHL(['Sabres', 'Lightning', 'Lightning','Sharks','Sharks','Lightning','Lightning', 'Penguins', 'Lightning', 'Sharks', 'Bruins', 'Flames', 'Bruins', 'Maple Leafs']))
+# print(filter_onlyNHL(['Sabres', 'Lightning', 'Lightning','Sharks','Sharks','Lightning','Lightning', 'Penguins', 'Lightning', 'Sharks', 'Bruins', 'Flames', 'Bruins', 'Maple Leafs']))
 
 
 def get_details(playerID, data):
@@ -305,9 +304,12 @@ def build_playerID(season, min_teams, playerID=None):
 #   print out build player id of that random player
 
 # Black Coleman 8476399 'Devils', 'Lightning', 'Flames'
+# 8474034
 
-season = 19941995
+season = 20242025
 min_teams = 7
+# print(get_specific_stats(8474034))
+print(get_previous_teams(8474034))
 # print(build_playerID(season, min_teams))
 
 
