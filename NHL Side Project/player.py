@@ -207,9 +207,12 @@ def filter_onlyNHL(teams):
       rem_dups.append(onlyNHL[left])
       left = right
 
+  if onlyNHL[left] != rem_dups[-1]:
+    rem_dups.append(onlyNHL[left])
+
   return rem_dups
 
-# print(filter_onlyNHL(['Sabres', 'Lightning', 'Lightning','Lightning','Lightning', 'Penguins', 'Lightning', 'Sharks', 'Bruins', 'Flames', 'Bruins', 'Maple Leafs']))
+print(filter_onlyNHL(['Sabres', 'Lightning', 'Lightning','Sharks','Sharks','Lightning','Lightning', 'Penguins', 'Lightning', 'Sharks', 'Bruins', 'Flames', 'Bruins', 'Maple Leafs']))
 
 
 def get_details(playerID, data):
@@ -305,7 +308,7 @@ def build_playerID(season, min_teams, playerID=None):
 
 season = 19941995
 min_teams = 7
-print(build_playerID(season, min_teams))
+# print(build_playerID(season, min_teams))
 
 
 # -------------- Seasonal Data Methods ---------------
