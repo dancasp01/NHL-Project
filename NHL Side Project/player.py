@@ -192,16 +192,28 @@ def filter_onlyNHL(teams):
   #This gets rid of non-NHL teams and None from list
 
   onlyNHL = []
+  rem_dups = []
 
   for team in teams:
     if team in nhl_teams:
       onlyNHL.append(team)
 
-  return onlyNHL
+  # two pointer approach
+
+  left = 0
+
+  for right in range(1,len(onlyNHL)):
+    if onlyNHL[left] != onlyNHL[right]:
+      rem_dups.append(onlyNHL[left])
+      left = right
+
+  return rem_dups
+
+# print(filter_onlyNHL(['Sabres', 'Lightning', 'Lightning','Lightning','Lightning', 'Penguins', 'Lightning', 'Sharks', 'Bruins', 'Flames', 'Bruins', 'Maple Leafs']))
 
 
 def get_details(playerID, data):
-  
+
   player_details = []
 
   firstName = data.get('firstName')
@@ -237,8 +249,7 @@ def get_previous_teams(playerID):
     
     team = teamCommonName.get('default')
 
-    if team not in previous_teams:
-      previous_teams.append(team)
+    previous_teams.append(team)
 
   previous_teams = filter_onlyNHL(previous_teams)
 
@@ -292,8 +303,8 @@ def build_playerID(season, min_teams, playerID=None):
 
 # Black Coleman 8476399 'Devils', 'Lightning', 'Flames'
 
-season = 20242025
-min_teams = 5
+season = 19941995
+min_teams = 7
 print(build_playerID(season, min_teams))
 
 
